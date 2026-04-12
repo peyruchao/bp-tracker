@@ -1,0 +1,106 @@
+import React, { useMemo } from 'react';
+import { useRecords } from '../context/RecordsContext';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, subMonths } from 'date-fns';
+
+export const CalendarView: React.FC = () => {
+  const { records } = useRecords();
+  
+  // Generate last 6 months for the scrollable view
+  const months = useMemo(() => {
+    const list = [];
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+      list.push(subMonths(now, i));
+    }
+    return list;
+  }, []);
+
+  // Map dates to what periods are recorded
+  const recordMap = useMemo(() => {
+    const map = new Map<string, { morning: boolean; evening: boolean }>();
+    records.forEach(r => {
+      const existing = map.get(r.date) || { morning: false, evening: false };
+      if (r.period === 'morning') existing.morning = true;
+      if (r.period === 'evening') existing.evening = true;
+      map.set(r.date, existing);
+    });
+    return map;
+  }, [records]);
+
+  return (
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '2rem' }}>
+      <h2 style={{ fontSize: '1.25rem', padding: '0 0.5rem' }}>Calendar</h2>
+      
+      {months.map(month => {
+        const start = startOfMonth(month);
+        const end = endOfMonth(month);
+        const days = eachDayOfInterval({ start, end });
+        
+        // Add empty padding days to align grid
+        const startDayOfWeek = start.getDay();
+        const paddingDays = Array.from({ length: startDayOfWeek }).map((_, i) => i);
+
+        return (
+          <div key={month.toISOString()} className="card" style={{ padding: '1rem' }}>
+            <h3 style={{ marginBottom: '1rem', textAlign: 'center', fontSize: '1.1rem' }}>
+              {format(month, 'MMMM yyyy')}
+            </h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.25rem', textAlign: 'center', marginBottom: '0.5rem' }}>
+              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+                <div key={d} style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{d}</div>
+              ))}
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.25rem' }}>
+              {paddingDays.map(p => (
+                <div key={`empty-${p}`} />
+              ))}
+              
+              {days.map(day => {
+                const dateKey = format(day, 'yyyy-MM-dd');
+                const hasRecord = recordMap.get(dateKey);
+                const isToday = isSameDay(day, new Date());
+                
+                return (
+                  <div 
+                    key={dateKey} 
+                    style={{ 
+                      aspectRatio: '1', 
+                      display: 'flex', 
+                      flexDirection: 'column',
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      borderRadius: '8px',
+                      backgroundColor: isToday ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                      border: isToday ? '1px solid var(--primary)' : '1px solid transparent',
+                      position: 'relative',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    <span>{format(day, 'd')}</span>
+                    
+                    <div style={{ display: 'flex', gap: '2px', marginTop: '2px' }}>
+                      {/* Morning Dot (Sun) */}
+                      {hasRecord?.morning ? (
+                        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#f59e0b' }} />
+                      ) : (
+                        <div style={{ width: '4px', height: '4px' }} />
+                      )}
+                      {/* Evening Dot (Moon) */}
+                      {hasRecord?.evening ? (
+                        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#6366f1' }} />
+                      ) : (
+                        <div style={{ width: '4px', height: '4px' }} />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
