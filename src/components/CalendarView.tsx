@@ -2,18 +2,35 @@ import React, { useMemo } from 'react';
 import { useRecords } from '../context/RecordsContext';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, subMonths } from 'date-fns';
 
-export const CalendarView: React.FC = () => {
+export const CalendarView: React.FC<{ onDateClick?: (date: string) => void }> = ({ onDateClick }) => {
   const { records } = useRecords();
   
-  // Generate last 6 months for the scrollable view
+  // Generate dynamically back to earliest month
   const months = useMemo(() => {
     const list = [];
     const now = new Date();
-    for (let i = 0; i < 6; i++) {
-      list.push(subMonths(now, i));
+    list.push(now);
+    
+    if (records.length > 0) {
+      // Find oldest record date
+      const timestamps = records.map(r => new Date(`${r.date}T00:00:00`).getTime());
+      const oldestDate = new Date(Math.min(...timestamps));
+      let currentMonth = subMonths(now, 1);
+      const oldestMonthStart = startOfMonth(oldestDate);
+      
+      let safety = 36; // 3 years max to prevent infinite loops
+      while (currentMonth >= oldestMonthStart && safety > 0) {
+        list.push(currentMonth);
+        currentMonth = subMonths(currentMonth, 1);
+        safety--;
+      }
+    } else {
+      for (let i = 1; i < 6; i++) {
+        list.push(subMonths(now, i));
+      }
     }
     return list;
-  }, []);
+  }, [records]);
 
   // Map dates to what periods are recorded
   const recordMap = useMemo(() => {
@@ -65,7 +82,9 @@ export const CalendarView: React.FC = () => {
                 return (
                   <div 
                     key={dateKey} 
+                    onClick={() => onDateClick && onDateClick(dateKey)}
                     style={{ 
+                      cursor: 'pointer',
                       aspectRatio: '1', 
                       display: 'flex', 
                       flexDirection: 'column',

@@ -35,6 +35,12 @@ const LoginScreen = () => {
 const MainApp = () => {
   const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<'home' | 'input' | 'calendar' | 'list'>('home');
+  const [selectedHistoryDate, setSelectedHistoryDate] = useState<string | null>(null);
+
+  const handleDateClick = (date: string) => {
+    setSelectedHistoryDate(date);
+    setActiveTab('list');
+  };
 
   return (
     <RecordsProvider>
@@ -59,8 +65,8 @@ const MainApp = () => {
         <main className="main-content">
           {activeTab === 'home' && <Dashboard />}
           {activeTab === 'input' && <InputForm onSuccess={() => setActiveTab('home')} />}
-          {activeTab === 'calendar' && <CalendarView />}
-          {activeTab === 'list' && <HistoryList />}
+          {activeTab === 'calendar' && <CalendarView onDateClick={handleDateClick} />}
+          {activeTab === 'list' && <HistoryList initialFilterDate={selectedHistoryDate} onClearFilter={() => setSelectedHistoryDate(null)} />}
         </main>
 
         {/* Bottom Navigation */}

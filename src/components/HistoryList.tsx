@@ -1,17 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRecords } from '../context/RecordsContext';
 import { getBPStatus } from '../types';
 import * as xlsx from 'xlsx';
+import { FiSun, FiMoon } from 'react-icons/fi';
 
-export const HistoryList: React.FC = () => {
+export const HistoryList: React.FC<{ initialFilterDate?: string | null; onClearFilter?: () => void }> = ({ initialFilterDate, onClearFilter }) => {
   const { records } = useRecords();
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(initialFilterDate || '');
+  const [endDate, setEndDate] = useState(initialFilterDate || '');
+
+  useEffect(() => {
+    if (initialFilterDate) {
+      setStartDate(initialFilterDate);
+      setEndDate(initialFilterDate);
+    }
+  }, [initialFilterDate]);
+
+  const filteredRecords = React.useMemo(() => {
+    let result = records;
+    if (startDate) result = result.filter(r => r.date >= startDate);
+    if (endDate) result = result.filter(r => r.date <= endDate);
+    return result;
+  }, [records, startDate, endDate]);
+
+  const handleClear = () => {
+    setStartDate('');
+    setEndDate('');
+    if (onClearFilter) onClearFilter();
+  };
 
   const handleExport = () => {
-    let toExport = records;
-    if (startDate) toExport = toExport.filter(r => r.date >= startDate);
-    if (endDate) toExport = toExport.filter(r => r.date <= endDate);
+    const toExport = filteredRecords;
 
     if (toExport.length === 0) {
       alert("No records found in this date range.");
@@ -54,24 +73,35 @@ export const HistoryList: React.FC = () => {
         
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', backgroundColor: 'var(--card-bg)', padding: '0.5rem', borderRadius: 'var(--radius-md)' }}>
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Start Date</span>
-            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ border: 'none', background: 'transparent', fontSize: '0.875rem' }} />
+            <span style={{ fontSize: '0.75rem', color: '#ffffff', fontWeight: 500 }}>Start Date</span>
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ border: 'none', background: 'transparent', fontSize: '0.875rem', color: '#ffffff', outline: 'none', colorScheme: 'dark' }} />
           </div>
           <span style={{ color: 'var(--border-color)' }}>|</span>
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>End Date</span>
-            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ border: 'none', background: 'transparent', fontSize: '0.875rem' }} />
+            <span style={{ fontSize: '0.75rem', color: '#ffffff', fontWeight: 500 }}>End Date</span>
+            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ border: 'none', background: 'transparent', fontSize: '0.875rem', color: '#ffffff', outline: 'none', colorScheme: 'dark' }} />
           </div>
         </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {records.length === 0 ? (
+        {filteredRecords.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
             No records found.
+            {(startDate || endDate) && (
+              <div style={{ marginTop: '1rem' }}>
+                <button 
+                  onClick={handleClear} 
+                  className="btn-primary" 
+                  style={{ width: 'auto', padding: '0.4rem 0.8rem', fontSize: '0.875rem' }}
+                >
+                  Clear Filter
+                </button>
+              </div>
+            )}
           </div>
         ) : (
-          records.map(record => {
+          filteredRecords.map(record => {
             const rStatus = getBPStatus(record.systolic, record.diastolic);
             const colorClass = rStatus === 'very-high' ? 'text-very-high' : rStatus === 'high' ? 'text-high' : 'text-normal';
 
@@ -81,8 +111,8 @@ export const HistoryList: React.FC = () => {
                   <div>
                     <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{record.date}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
-                      <span style={{ fontSize: '0.875rem', textTransform: 'capitalize', color: 'var(--text-secondary)' }}>
-                        {record.period === 'morning' ? '🌅 Morning' : '🌙 Evening'}
+                      <span style={{ fontSize: '0.875rem', textTransform: 'capitalize', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        {record.period === 'morning' ? <><FiSun size={14}/> Morning</> : <><FiMoon size={14}/> Evening</>}
                       </span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                         {new Date(record.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

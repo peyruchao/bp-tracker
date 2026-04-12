@@ -116,8 +116,8 @@ export const InputForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) =>
       <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', textAlign: 'center' }}>New Record</h2>
       
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', width: '100%' }}>
+          <div className="form-group" style={{ flex: 1, minWidth: 0, marginBottom: 0 }}>
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <span>Date</span>
               <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>(Tap to pick)</span>
@@ -125,29 +125,29 @@ export const InputForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) =>
             <input 
               type="date" 
               className="form-input" 
-              style={{ fontSize: '1rem', padding: '0.5rem', cursor: 'pointer' }}
+              style={{ fontSize: '1rem', padding: '0.5rem', cursor: 'pointer', width: '100%' }}
               value={date} 
               onChange={e => setDate(e.target.value)}
               required 
             />
           </div>
           
-          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+          <div className="form-group" style={{ flex: 1, minWidth: 0, marginBottom: 0 }}>
             <label className="form-label">Period</label>
             <select 
               className="form-input" 
-              style={{ fontSize: '1rem', padding: '0.5rem', appearance: 'none' }}
+              style={{ fontSize: '1rem', padding: '0.5rem', appearance: 'none', width: '100%', textOverflow: 'ellipsis' }}
               value={period}
               onChange={e => setPeriod(e.target.value as 'morning' | 'evening')}
             >
-              <option value="morning">🌅 Morning</option>
-              <option value="evening">🌙 Evening</option>
+              <option value="morning">Morning</option>
+              <option value="evening">Evening</option>
             </select>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', width: '100%' }}>
+          <div className="form-group" style={{ flex: 1, minWidth: 0, marginBottom: 0 }}>
             <label className="form-label">Systolic (SYS)</label>
             <input 
               ref={sysRef}
@@ -161,7 +161,7 @@ export const InputForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) =>
             />
           </div>
           
-          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+          <div className="form-group" style={{ flex: 1, minWidth: 0, marginBottom: 0 }}>
             <label className="form-label">Diastolic (DIA)</label>
             <input 
               ref={diaRef}

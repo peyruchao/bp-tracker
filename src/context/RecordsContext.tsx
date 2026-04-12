@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { collection, addDoc, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, doc, deleteDoc, updateDoc, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { BloodPressureRecord } from '../types';
 import { useAuth } from './AuthContext';
@@ -7,12 +7,16 @@ import { useAuth } from './AuthContext';
 interface RecordsContextType {
   records: BloodPressureRecord[];
   addRecord: (record: Omit<BloodPressureRecord, 'id' | 'userId'>) => Promise<void>;
+  deleteRecord: (id: string) => Promise<void>;
+  updateRecord: (id: string, recordData: Partial<BloodPressureRecord>) => Promise<void>;
   loading: boolean;
 }
 
 const RecordsContext = createContext<RecordsContextType>({
   records: [],
   addRecord: async () => {},
+  deleteRecord: async () => {},
+  updateRecord: async () => {},
   loading: true,
 });
 
@@ -78,8 +82,28 @@ export const RecordsProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const deleteRecord = async (id: string) => {
+    try {
+      const docRef = doc(db, 'records', id);
+      await deleteDoc(docRef);
+    } catch (error: any) {
+      console.error("Error deleting record: ", error);
+      alert(`Could not delete record.\n${error.message}`);
+    }
+  };
+
+  const updateRecord = async (id: string, recordData: Partial<BloodPressureRecord>) => {
+    try {
+      const docRef = doc(db, 'records', id);
+      await updateDoc(docRef, recordData);
+    } catch (error: any) {
+      console.error("Error updating record: ", error);
+      alert(`Could not update record.\n${error.message}`);
+    }
+  };
+
   return (
-    <RecordsContext.Provider value={{ records, addRecord, loading }}>
+    <RecordsContext.Provider value={{ records, addRecord, deleteRecord, updateRecord, loading }}>
       {children}
     </RecordsContext.Provider>
   );
