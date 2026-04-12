@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRecords } from '../context/RecordsContext';
-import { getBPStatus } from '../types';
+import { getBPStatus, getSysStatus, getDiaStatus, bpStatusColor } from '../types';
 import * as xlsx from 'xlsx';
-import { FiSun, FiMoon } from 'react-icons/fi';
+import { FiSun, FiMoon, FiFileText } from 'react-icons/fi';
 
 export const HistoryList: React.FC<{ initialFilterDate?: string | null; onClearFilter?: () => void }> = ({ initialFilterDate, onClearFilter }) => {
   const { records } = useRecords();
@@ -102,8 +102,8 @@ export const HistoryList: React.FC<{ initialFilterDate?: string | null; onClearF
           </div>
         ) : (
           filteredRecords.map(record => {
-            const rStatus = getBPStatus(record.systolic, record.diastolic);
-            const colorClass = rStatus === 'very-high' ? 'text-very-high' : rStatus === 'high' ? 'text-high' : 'text-normal';
+            const sysColor = bpStatusColor(getSysStatus(record.systolic));
+            const diaColor = bpStatusColor(getDiaStatus(record.diastolic));
 
             return (
               <div key={record.id} className="card" style={{ marginBottom: 0 }}>
@@ -121,8 +121,10 @@ export const HistoryList: React.FC<{ initialFilterDate?: string | null; onClearF
                   </div>
                   
                   <div style={{ textAlign: 'right' }}>
-                    <div className={colorClass} style={{ fontWeight: 700, fontSize: '1.25rem' }}>
-                      {record.systolic} / {record.diastolic}
+                    <div style={{ fontWeight: 700, fontSize: '1.25rem' }}>
+                      <span style={{ color: sysColor }}>{record.systolic}</span>
+                      <span style={{ color: 'var(--text-secondary)', margin: '0 2px' }}>/</span>
+                      <span style={{ color: diaColor }}>{record.diastolic}</span>
                     </div>
                     <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                       Pulse: {record.pulse}
@@ -131,8 +133,9 @@ export const HistoryList: React.FC<{ initialFilterDate?: string | null; onClearF
                 </div>
                 
                 {record.notes && (
-                  <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                    📝 {record.notes}
+                  <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-color)', padding: '0.5rem 0.75rem', borderRadius: '4px', borderLeft: '3px solid var(--border-color)', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                    <FiFileText color="#ffffff" size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
+                    <div>{record.notes}</div>
                   </div>
                 )}
               </div>

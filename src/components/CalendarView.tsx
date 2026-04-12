@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useRecords } from '../context/RecordsContext';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, subMonths } from 'date-fns';
+import { FiSun, FiMoon } from 'react-icons/fi';
 
 export const CalendarView: React.FC<{ onDateClick?: (date: string) => void }> = ({ onDateClick }) => {
   const { records } = useRecords();
@@ -99,18 +100,12 @@ export const CalendarView: React.FC<{ onDateClick?: (date: string) => void }> = 
                   >
                     <span>{format(day, 'd')}</span>
                     
-                    <div style={{ display: 'flex', gap: '2px', marginTop: '2px' }}>
-                      {/* Morning Dot (Sun) */}
-                      {hasRecord?.morning ? (
-                        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#f59e0b' }} />
-                      ) : (
-                        <div style={{ width: '4px', height: '4px' }} />
+                    <div style={{ display: 'flex', gap: '4px', marginTop: '3px', height: '14px' }}>
+                      {hasRecord?.morning && (
+                        <FiSun size={14} color="#fde047" />
                       )}
-                      {/* Evening Dot (Moon) */}
-                      {hasRecord?.evening ? (
-                        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#6366f1' }} />
-                      ) : (
-                        <div style={{ width: '4px', height: '4px' }} />
+                      {hasRecord?.evening && (
+                        <FiMoon size={14} color="#93c5fd" />
                       )}
                     </div>
                   </div>

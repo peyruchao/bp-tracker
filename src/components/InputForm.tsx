@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRecords } from '../context/RecordsContext';
-import { getBPStatus } from '../types';
+import { getSysStatus, getDiaStatus } from '../types';
 
 export const InputForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const { addRecord } = useRecords();
@@ -105,11 +105,12 @@ export const InputForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) =>
 
   const sysNum = parseInt(systolic);
   const diaNum = parseInt(diastolic);
-  const bpStatus = sysNum && diaNum ? getBPStatus(sysNum, diaNum) : 'normal';
-  
-  let valColorClass = 'text-normal';
-  if (bpStatus === 'very-high') valColorClass = 'text-very-high';
-  else if (bpStatus === 'high') valColorClass = 'text-high';
+
+  const sysStatus = sysNum ? getSysStatus(sysNum) : 'normal';
+  const diaStatus = diaNum ? getDiaStatus(diaNum) : 'normal';
+
+  const sysColorClass = sysStatus === 'very-high' ? 'text-very-high' : sysStatus === 'high' ? 'text-high' : 'text-normal';
+  const diaColorClass = diaStatus === 'very-high' ? 'text-very-high' : diaStatus === 'high' ? 'text-high' : 'text-normal';
 
   return (
     <div className="animate-fade-in card">
@@ -153,7 +154,7 @@ export const InputForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) =>
               ref={sysRef}
               type="tel" 
               placeholder="120"
-              className={`form-input ${systolic ? valColorClass : ''}`} 
+              className={`form-input ${systolic ? sysColorClass : ''}`} 
               value={systolic} 
               onChange={handleSysChange}
               required 
@@ -167,7 +168,7 @@ export const InputForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) =>
               ref={diaRef}
               type="tel" 
               placeholder="80"
-              className={`form-input ${diastolic ? valColorClass : ''}`} 
+              className={`form-input ${diastolic ? diaColorClass : ''}`} 
               value={diastolic} 
               onChange={handleDiaChange}
               required 

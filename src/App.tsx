@@ -36,6 +36,7 @@ const MainApp = () => {
   const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<'home' | 'input' | 'calendar' | 'list'>('home');
   const [selectedHistoryDate, setSelectedHistoryDate] = useState<string | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleDateClick = (date: string) => {
     setSelectedHistoryDate(date);
@@ -45,20 +46,40 @@ const MainApp = () => {
   return (
     <RecordsProvider>
       <div className="app-container">
-        {/* Top Header */}
-        <header style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)', zIndex: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-              {user?.displayName?.charAt(0) || 'U'}
+        <header style={{ padding: '1.5rem 1.25rem 0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-color)', zIndex: 10 }}>
+          <h1 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0, display: 'flex', flexDirection: 'column' }}>
+            Blood Pressure Tracker
+            <span style={{ fontSize: '0.65em', opacity: 0.6, fontWeight: 400, marginTop: '0.1rem' }}>by Peggy</span>
+          </h1>
+          
+          <div style={{ position: 'relative' }}>
+            <div 
+              style={{ width: 40, height: 40, borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', cursor: 'pointer', backgroundColor: '#000000', boxShadow: '0 0 10px rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
+              onClick={() => setShowUserMenu(!showUserMenu)}
+            >
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt={user.displayName || 'Avatar'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                user?.displayName?.charAt(0) || 'U'
+              )}
             </div>
-            <div>
-              <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>{user?.displayName}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Google Account</div>
-            </div>
+            
+            {showUserMenu && (
+              <div style={{ position: 'absolute', top: '120%', right: 0, backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '0.75rem', minWidth: '200px', boxShadow: 'var(--shadow-lg)', zIndex: 50 }}>
+                <div style={{ paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {user?.displayName || 'User'}
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem', whiteSpace: 'nowrap' }}>
+                    {user?.email}
+                  </div>
+                </div>
+                <button onClick={() => { setShowUserMenu(false); signOut(); }} style={{ width: '100%', background: 'none', border: 'none', color: '#fca5a5', cursor: 'pointer', padding: '0.6rem 0 0.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', fontSize: '0.9rem' }}>
+                  <FiLogOut size={18} /> Sign out
+                </button>
+              </div>
+            )}
           </div>
-          <button onClick={signOut} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.5rem' }}>
-            <FiLogOut size={20} />
-          </button>
         </header>
 
         {/* Main Content Area */}
@@ -75,28 +96,28 @@ const MainApp = () => {
             className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
             onClick={() => setActiveTab('home')}
           >
-            <FiHome />
+            <div className="nav-icon-wrap"><FiHome size={20} /></div>
             <span>Home</span>
           </button>
           <button 
             className={`nav-item ${activeTab === 'input' ? 'active' : ''}`}
             onClick={() => setActiveTab('input')}
           >
-            <FiPlusSquare />
+            <div className="nav-icon-wrap"><FiPlusSquare size={20} /></div>
             <span>Record</span>
           </button>
           <button 
             className={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`}
             onClick={() => setActiveTab('calendar')}
           >
-            <FiCalendar />
+            <div className="nav-icon-wrap"><FiCalendar size={20} /></div>
             <span>Calendar</span>
           </button>
           <button 
             className={`nav-item ${activeTab === 'list' ? 'active' : ''}`}
             onClick={() => setActiveTab('list')}
           >
-            <FiList />
+            <div className="nav-icon-wrap"><FiList size={20} /></div>
             <span>History</span>
           </button>
         </nav>

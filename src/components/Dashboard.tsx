@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useRecords } from '../context/RecordsContext';
-import { getBPStatus } from '../types';
+import { getSysStatus, getDiaStatus, bpStatusColor } from '../types';
 import { format, parseISO } from 'date-fns';
 import { FiEdit2, FiTrash2, FiCheck, FiX, FiSun, FiMoon, FiFileText } from 'react-icons/fi';
 
@@ -47,7 +47,7 @@ export const Dashboard: React.FC = () => {
     return () => observer.disconnect();
   }, [groupedRecords.keys.length, datesToShow]);
 
-  const { morningAvg, eveningAvg, currentMonthCount } = useMemo(() => {
+  const { morningAvg, eveningAvg } = useMemo(() => {
     const now = new Date();
     const currentMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     
@@ -92,8 +92,8 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <div className="card" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #60a5fa 100%)', color: 'white', border: 'none' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div className="card" style={{ background: 'linear-gradient(135deg, #0d0d0d 0%, #000000 100%)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.1)' }}>
         <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', opacity: 0.9 }}>Monthly Overview</h2>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -149,8 +149,8 @@ export const Dashboard: React.FC = () => {
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     {group.data.map(record => {
                       const isEditing = editingId === record.id;
-                      const rStatus = getBPStatus(record.systolic, record.diastolic);
-                      const colorClass = rStatus === 'very-high' ? 'text-very-high' : rStatus === 'high' ? 'text-high' : 'text-normal';
+                      const sysColor = bpStatusColor(getSysStatus(record.systolic));
+                      const diaColor = bpStatusColor(getDiaStatus(record.diastolic));
                       
                       return (
                         <div key={record.id} style={{ display: 'flex', flexDirection: 'column', padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)' }}>
@@ -159,12 +159,12 @@ export const Dashboard: React.FC = () => {
                               {!isEditing && (
                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                   <button onClick={() => {
-                                    setEditingId(record.id);
+                                    if (record.id) setEditingId(record.id);
                                     setEditForm({ systolic: record.systolic, diastolic: record.diastolic, pulse: record.pulse, notes: record.notes || '' });
                                   }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}><FiEdit2 size={18} /></button>
 
                                   <button onClick={() => {
-                                    if (window.confirm('Delete this record?')) deleteRecord(record.id);
+                                    if (record.id && window.confirm('Delete this record?')) deleteRecord(record.id);
                                   }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}><FiTrash2 size={18} /></button>
                                 </div>
                               )}
@@ -183,8 +183,10 @@ export const Dashboard: React.FC = () => {
                               </div>
                             ) : (
                               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                <div className={colorClass} style={{ width: '90px', textAlign: 'right', fontWeight: 700, fontSize: '1.2rem', whiteSpace: 'nowrap' }}>
-                                  {record.systolic} <span style={{fontSize: '0.9rem', opacity: 0.6}}>/</span> {record.diastolic}
+                                <div style={{ width: '90px', textAlign: 'right', fontWeight: 700, fontSize: '1.2rem', whiteSpace: 'nowrap' }}>
+                                  <span style={{ color: sysColor }}>{record.systolic}</span>
+                                  <span style={{ fontSize: '0.9rem', opacity: 0.6, margin: '0 2px' }}>/</span>
+                                  <span style={{ color: diaColor }}>{record.diastolic}</span>
                                 </div>
                                 <div style={{ width: '45px', textAlign: 'right', fontSize: '1.05rem', color: 'var(--text-primary)', fontWeight: 600 }}>
                                   {record.pulse}
