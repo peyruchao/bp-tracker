@@ -10,8 +10,8 @@
   --primary-hover: #1a1a1a;
   
   --color-normal: #34d399;
-  --color-high: #f87171;
-  --color-very-high: #fca5a5; 
+  --color-high: #f87171;      /* High: orange-red */
+  --color-very-high: #dc2626; /* Very High: deep red, more alarming */ 
   
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
