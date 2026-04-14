@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRecords } from '../context/RecordsContext';
 import { getBPStatus, getSysStatus, getDiaStatus, bpStatusColor } from '../types';
-import * as xlsx from 'xlsx';
 import { FiSun, FiMoon, FiFileText } from 'react-icons/fi';
 
 export const HistoryList: React.FC<{ initialFilterDate?: string | null; onClearFilter?: () => void }> = ({ initialFilterDate, onClearFilter }) => {
@@ -29,7 +28,7 @@ export const HistoryList: React.FC<{ initialFilterDate?: string | null; onClearF
     if (onClearFilter) onClearFilter();
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     const toExport = filteredRecords;
 
     if (toExport.length === 0) {
@@ -37,7 +36,9 @@ export const HistoryList: React.FC<{ initialFilterDate?: string | null; onClearF
       return;
     }
 
-    // Prepare data for Excel
+    // Dynamically import xlsx only when needed (code splitting)
+    const xlsx = await import('xlsx');
+
     const data = toExport.map(r => ({
       Date: r.date,
       Time: new Date(r.timestamp).toLocaleTimeString(),
@@ -52,8 +53,6 @@ export const HistoryList: React.FC<{ initialFilterDate?: string | null; onClearF
     const worksheet = xlsx.utils.json_to_sheet(data);
     const workbook = xlsx.utils.book_new();
     xlsx.utils.book_append_sheet(workbook, worksheet, "BP Records");
-    
-    // Generate and download
     xlsx.writeFile(workbook, `BP_Records_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
